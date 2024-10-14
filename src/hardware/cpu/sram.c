@@ -154,7 +154,14 @@ uint8_t sram_cache_read(uint64_t paddr_value)
     {
 #ifndef CACHE_SIMULATION_VERIFICATION
         // write back the dirty line to dram
-        bus_write_cacheline(paddr.paddr_value, victim);
+        // fix: bus_write_cacheline(paddr.paddr_value, victim);
+        // write to victim origin memory address, not current memory address.
+        address_t victim_origin_address = {
+                .ct = victim->tag,
+                .ci = paddr.ci,
+                .co = 0,
+        }
+        bus_write_cacheline(victim_origin_address.paddr_value ,victim);
 #else
         dirty_bytes_evicted_count   += (1 << SRAM_CACHE_OFFSET_LENGTH);
         dirty_bytes_in_cache_count  -= (1 << SRAM_CACHE_OFFSET_LENGTH);
@@ -291,7 +298,15 @@ void sram_cache_write(uint64_t paddr_value, uint8_t data)
     {
 #ifndef CACHE_SIMULATION_VERIFICATION
         // write back the dirty line to dram
-        bus_write_cacheline(paddr.paddr_value, victim);
+        // fix: bus_write_cacheline(paddr.paddr_value, victim);
+        // write to victim origin memory address, not current memory address.
+        address_t victim_origin_address = {
+                .ct = victim->tag,
+                .ci = paddr.ci,
+                .co = 0,
+        }
+        bus_write_cacheline(victim_origin_address.paddr_value ,victim);
+    
 #else
         dirty_bytes_evicted_count   += (1 << SRAM_CACHE_OFFSET_LENGTH);
         dirty_bytes_in_cache_count  -= (1 << SRAM_CACHE_OFFSET_LENGTH);
